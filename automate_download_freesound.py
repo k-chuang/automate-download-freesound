@@ -164,7 +164,9 @@ def list_of_sounds(arguments):
     try:
         # Remove spaces between commas (if user happens to have spaces)
         no_space = re.sub(r'\s*,\s*', ',', arguments)
-        return map(str, no_space.split(','))
+        sound_list = map(str, no_space.split(','))
+        sound_list = filter(None, sound_list)
+        return sound_list
     except:
         raise argparse.ArgumentTypeError("List of sounds must be separated by commas (no spaces).")
 
@@ -172,8 +174,8 @@ def list_of_sounds(arguments):
 def parse_args(argv):
     '''
 
-    :param argv:
-    :return:
+    :param argv: string of sys arguments passed to command line
+    :return: arguments parsed out of sys.argv
     '''
     parser = argparse.ArgumentParser(description='Download audio files from Freesound.org!')
     parser.add_argument('sounds',

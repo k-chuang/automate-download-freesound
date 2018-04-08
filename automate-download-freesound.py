@@ -27,7 +27,7 @@ def authenticate():
     return user_info
 
 
-def simulate_download(sound, download_path, args):
+def simulate_download(sound, download_path, user, pass_w, args):
     '''A function used to automate downloading of sound files via Selenium.
 
     :param sound: a string of the desired sound to download
@@ -57,25 +57,23 @@ def simulate_download(sound, download_path, args):
     prefs = {"download.default_directory": full_path}
     chromeOptions.add_experimental_option("prefs", prefs)
     search_subject = sound
-    driver = webdriver.Chrome("/Users/KevinChuang/ChromeDriver/chromedriver",
-                              chrome_options=chromeOptions)
+    driver = webdriver.Chrome(chrome_options=chromeOptions)
 
     try:
 
         driver.get("https://freesound.org/home/login/?next=/search/")
+        username = driver.find_element_by_xpath('//*[@id="id_username"]')
+        username.send_keys(user)
+        password = driver.find_element_by_xpath('//*[@id="id_password"]')
+        password.send_keys(pass_w)
+        loginSelect = driver.find_element_by_xpath('//*[@id="content_full"]/form/input[2]')
+        loginSelect.send_keys(Keys.RETURN)
 
-        # Checking if login credentials are correct before moving out
-        while (re.match("https://freesound.org/home/login/", driver.current_url)):
-
-            user_info = authenticate()
-            user = user_info.email
-            pass_w = user_info.password
-            username = driver.find_element_by_xpath('//*[@id="id_username"]')
-            username.send_keys(user)
-            password = driver.find_element_by_xpath('//*[@id="id_password"]')
-            password.send_keys(pass_w)
-            loginSelect = driver.find_element_by_xpath('//*[@id="content_full"]/form/input[2]')
-            loginSelect.send_keys(Keys.RETURN)
+        # Checking if login credentials are correct before moving out, if not exit the script
+        if re.match("https://freesound.org/home/login/", driver.current_url):
+            print("The login credentials you provided were incorrect. Please re-run the script. Exiting now...")
+            driver.quit()
+            exit(1)
 
         # Go to the freesound site, and enter in the desired sound
         driver.get("https://freesound.org")
@@ -105,12 +103,18 @@ def simulate_download(sound, download_path, args):
         if args.advanced_filter:
             # Advanced search for only search subject in tags or file name
             driver.find_element_by_css_selector('a[onclick*=showAdvancedSearchOption').click()
-            tag_element = WebDriverWait(driver, 10).until(EC.visibility_of_element_located((By.NAME, 'a_tag')))
+            tag_element = WebDriverWait(driver, 10).until(
+                EC.visibility_of_element_located((By.NAME, 'a_tag')))
             tag_element.click()
-            file_element = WebDriverWait(driver, 10).until(EC.visibility_of_element_located((By.NAME, 'a_filename')))
+
+            file_element = WebDriverWait(driver, 10).until(
+                EC.visibility_of_element_located((By.NAME, 'a_filename')))
             file_element.click()
-            description_element = WebDriverWait(driver, 10).until(EC.visibility_of_element_located((By.NAME, 'a_description')))
+
+            description_element = WebDriverWait(driver, 10).until(
+                EC.visibility_of_element_located((By.NAME, 'a_description')))
             description_element.click()
+
             new_advanced_search = driver.find_elements_by_xpath('//*[@id="search_submit"]')
             new_advanced_search[1].send_keys(Keys.RETURN)
 
@@ -215,10 +219,12 @@ def main():
     sounds = args.sounds
     download_path = args.downloadpath
 
+    user_info = authenticate()
+
     for elem in sounds:
-        simulate_download(elem, download_path, args)
+        simulate_download(elem, download_path, user_info.email, user_info.password, args)
         output_path = os.path.join(download_path, elem)
-        print("Done with downloading %s at %s" % (elem, output_path))
+        print("Finished downloading %s at %s" % (elem, output_path))
 
 
 if __name__ == "__main__":

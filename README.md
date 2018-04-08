@@ -6,4 +6,6 @@ A cool Python automation project that automates the menial task of downloading h
 Using the Selenium and a Google chromedriver, this project will automate downloading audio files 
 via a command line interface (CLI) application.
 
+Make sure to install the Google chromedriver.exe via brew or from the [Google site](https://sites.google.com/a/chromium.org/chromedriver/downloads),
+and set the location of the chromedriver on your SYSTEM PATH.
 

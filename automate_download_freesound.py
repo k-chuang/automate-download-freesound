@@ -13,6 +13,7 @@ import os
 import time
 from collections import namedtuple
 import argparse
+import sys
 
 
 def authenticate():
@@ -35,17 +36,12 @@ def simulate_download(sound, download_path, user, pass_w, args):
     :param args: a Namespace object with attributes such as file format, sample rate, and advanced filtering
     :return: None
     '''
-
-    if not download_path or not os.path.exists(download_path):
-        print("The download destination directory does not exist... Defaulting to Downloads folder.")
-        download_path = os.path.expanduser("~") + "/Downloads/"
-
     full_path = os.path.join(download_path, sound)
 
     # If the directory we are trying to write to already exists
     if os.path.exists(full_path):
         # dont write to it and exit the program
-        print("The requested directory already exists...")
+        print("The requested directory already exists at %s" % full_path)
         exit(1)
     else:
         # make a directory for the files to go to
@@ -173,13 +169,15 @@ def list_of_sounds(arguments):
         raise argparse.ArgumentTypeError("List of sounds must be separated by commas (no spaces).")
 
 
-def main():
+def parse_args(argv):
+    '''
 
+    :param argv:
+    :return:
+    '''
     parser = argparse.ArgumentParser(description='Download audio files from Freesound.org!')
-
-    parser.add_argument('--sounds',
+    parser.add_argument('sounds',
                         type=list_of_sounds,
-                        dest='sounds',
                         default=None,
                         help='Enter sound(s) you would like to download '
                              'separated by commas and no spaces. If desired sound '
@@ -209,15 +207,29 @@ def main():
 
     parser.add_argument('--advanced-filter',
                         dest='advanced_filter',
-                        type= bool,
+                        type=bool,
                         default=False,
                         help='Enter True if you want to initiate advanced filtering to limit audio files. '
                              'Only audio files with tags or filenames containing your search item will be downloaded.')
 
-    args = parser.parse_args()
+    # If no arguments provided, return help message
+    if len(sys.argv) == 1:
+        parser.print_help(sys.stderr)
+        sys.exit(1)
+
+    return parser.parse_args(argv[1:])
+
+
+def main(argv):
+    args = parse_args(argv)
+
     # To be clear:
     sounds = args.sounds
     download_path = args.downloadpath
+
+    if not download_path or not os.path.exists(download_path):
+        print("The download destination directory specified does not exist... Defaulting to Downloads folder.")
+        download_path = os.path.expanduser("~") + "/Downloads/"
 
     user_info = authenticate()
 
@@ -226,6 +238,8 @@ def main():
         output_path = os.path.join(download_path, elem)
         print("Finished downloading %s at %s" % (elem, output_path))
 
+    return 0
+
 
 if __name__ == "__main__":
-    main()
+    sys.exit(main(sys.argv))

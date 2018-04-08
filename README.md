@@ -1,4 +1,6 @@
 # Automating the Menial Tasks using Python Pt.2
+[![Build Status](https://travis-ci.org/k-chuang/automate-download-freesound.svg?branch=master)](https://travis-ci.org/k-chuang/automate-download-freesound)
+
 A cool Python automation project that automates the menial task of downloading hundreds of audio files on 
 [Freesound](freesound.org) using Selenium, a web-browser automation tool.
 

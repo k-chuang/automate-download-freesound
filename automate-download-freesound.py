@@ -36,14 +36,13 @@ def simulate_download(sound, download_path, user, pass_w, args):
     :return: None
     '''
 
-    source = download_path
-    if not os.path.exists(source):
-        print("The download destination directory does not exist...")
-        exit(1)
+    if not download_path or not os.path.exists(download_path):
+        print("The download destination directory does not exist... Defaulting to Downloads folder.")
+        download_path = os.path.expanduser("~") + "/Downloads/"
 
-    full_path = os.path.join(source, sound)
+    full_path = os.path.join(download_path, sound)
 
-    # if the directory we are trying to write to already exists
+    # If the directory we are trying to write to already exists
     if os.path.exists(full_path):
         # dont write to it and exit the program
         print("The requested directory already exists...")
@@ -190,8 +189,9 @@ def main():
     parser.add_argument('--download-dir',
                         dest='downloadpath',
                         default=None,
-                        help='Enter the download path where files will go, '
-                             'default will be your default Downloads folder.')
+                        help='Optional argument to specify the download path where files will go. '
+                             'Default will be your standard Downloads folder. '
+                             'Works for both MacOS and Windows environments.')
 
     parser.add_argument('--file-format',
                         dest='file_format',

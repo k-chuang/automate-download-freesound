@@ -1,8 +1,9 @@
 """
 Unit tests for test_automate_download_freesound.py
 Run with:
-$ pytest test_automate_download_freesound.py -v
+$ pytest
 """
+
 import unittest
 import mock
 import automate_download_freesound
@@ -10,13 +11,11 @@ from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
-from selenium.webdriver.common.keys import Keys
 from selenium.common.exceptions import NoSuchElementException, TimeoutException, WebDriverException
-import re
-import sys
 from collections import namedtuple
 import pytest
 import os
+import shutil
 
 
 class FreeSoundOrgLoginElementsTest(unittest.TestCase):
@@ -204,8 +203,63 @@ class FreeSoundOrgAdvancedFilter(unittest.TestCase):
         return True
 
 
+
 class SimulateDownloadIntegrationTest(unittest.TestCase):
-    pass
+
+    @classmethod
+    def setUpClass(cls):
+        cls.email = os.environ['FREESOUND_EMAIL']
+        cls.password = os.environ['FREESOUND_PASSWORD']
+        cls.download_path = os.path.expanduser("~") + "/Downloads/"
+        shutil.rmtree(os.path.join(cls.download_path, 'toaster pop set'), ignore_errors=True)
+        shutil.rmtree(os.path.join(cls.download_path, 'tiger'), ignore_errors=True)
+        shutil.rmtree(os.path.join(cls.download_path, 'glass breaking'), ignore_errors=True)
+
+    def test_simulate_download_basic(self):
+        '''
+        Testing with no filters, just the one positional argument
+        '''
+
+        args = automate_download_freesound.parse_args(['automate_download_freesound.py', 'toaster pop set'])
+        download_count = automate_download_freesound.simulate_download(
+            args.sounds[0], self.download_path, self.email, self.password, args)
+        self.assertEqual(download_count, 2)
+        update_download_path = os.path.join(self.download_path, 'toaster pop set')
+        self.assertEqual(len(os.listdir(update_download_path)), download_count)
+
+    def test_simulate_download_optional_arguments(self):
+        '''
+         Testing with optional filter arguments
+        '''
+
+        args = automate_download_freesound.parse_args(
+            ['automate_download_freesound.py', 'tiger',
+             '--sample-rate', '48000', '--file-format', 'mp3'])
+        download_count = automate_download_freesound.simulate_download(
+            args.sounds[0], self.download_path, self.email, self.password, args)
+        self.assertEqual(download_count, 2)
+        update_download_path = os.path.join(self.download_path, 'tiger')
+        self.assertEqual(len(os.listdir(update_download_path)), download_count)
+
+    def test_simulate_download_advanced_filters(self):
+        '''
+        Testing with optional arguments and advanced filters
+        '''
+        args = automate_download_freesound.parse_args(
+            ['automate_download_freesound.py', 'glass breaking',
+             '--sample-rate', '48000', '--file-format', 'flac', '--advanced-filter', 'True'])
+        download_count = automate_download_freesound.simulate_download(
+            args.sounds[0], self.download_path, self.email, self.password, args)
+        self.assertEqual(download_count, 3)
+        update_download_path = os.path.join(self.download_path, 'glass breaking')
+        self.assertEqual(len(os.listdir(update_download_path)), download_count)
+
+    @classmethod
+    def tearDownClass(cls):
+        shutil.rmtree(os.path.join(cls.download_path, 'toaster pop set'), ignore_errors=True)
+        shutil.rmtree(os.path.join(cls.download_path, 'tiger'), ignore_errors=True)
+        shutil.rmtree(os.path.join(cls.download_path, 'glass breaking'), ignore_errors=True)
+
 
 
 class FreeSoundLoginAuthenticationTest(unittest.TestCase):
@@ -249,8 +303,8 @@ class CommandLineArgumentsTests(unittest.TestCase):
         args = automate_download_freesound.parse_args(['automate_download_freesound.py', 'dogs'])
         self.assertEqual(args.sounds, ['dogs'])
         self.assertEqual(args.downloadpath, None)
-        self.assertEqual(args.file_format, 'wav')
-        self.assertEqual(args.samplerate, 48000)
+        self.assertEqual(args.file_format, None)
+        self.assertEqual(args.samplerate, None)
         self.assertFalse(args.advanced_filter)
 
     def test_parse_args_sound_two(self):
@@ -261,8 +315,8 @@ class CommandLineArgumentsTests(unittest.TestCase):
             ['automate_download_freesound.py', "dogs barking loud, birds chirping loud"])
         self.assertEqual(args.sounds, ['dogs barking loud', 'birds chirping loud'])
         self.assertEqual(args.downloadpath, None)
-        self.assertEqual(args.file_format, 'wav')
-        self.assertEqual(args.samplerate, 48000)
+        self.assertEqual(args.file_format, None)
+        self.assertEqual(args.samplerate, None)
         self.assertFalse(args.advanced_filter)
 
     def test_parse_args_sound_three(self):
@@ -273,14 +327,14 @@ class CommandLineArgumentsTests(unittest.TestCase):
             ['automate_download_freesound.py', "dogs,cats,birds,"])
         self.assertEqual(args.sounds, ['dogs', 'cats', 'birds'])
         self.assertEqual(args.downloadpath, None)
-        self.assertEqual(args.file_format, 'wav')
-        self.assertEqual(args.samplerate, 48000)
+        self.assertEqual(args.file_format, None)
+        self.assertEqual(args.samplerate, None)
         self.assertFalse(args.advanced_filter)
 
     def test_parse_args_format_one(self):
         args = automate_download_freesound.parse_args(
             ['automate_download_freesound.py', "dogs,cats,birds,", "--file-format", "wav"])
-        assert args.file_format in ["wav", "flac", "aiff", "ogg", "mp3", "m4a"]
+        assert args.file_format in [None, "wav", "flac", "aiff", "ogg", "mp3", "m4a"]
 
     def test_parse_args_format_two(self):
         with self.assertRaises(SystemExit):
@@ -290,7 +344,7 @@ class CommandLineArgumentsTests(unittest.TestCase):
     def test_parse_args_samplerate_one(self):
         args = automate_download_freesound.parse_args(
             ['automate_download_freesound.py', "dogs,cats,birds,", "--sample-rate", "48000"])
-        assert int(args.samplerate) in [11025, 16000, 22050, 44100, 48000, 88200, 96000]
+        assert int(args.samplerate) in [None, 11025, 16000, 22050, 44100, 48000, 88200, 96000]
 
     def test_parse_args_samplerate_two(self):
         with self.assertRaises(SystemExit):

@@ -43,6 +43,7 @@ There are more features and arguments, including download path, file format, sam
 
 
 # Scripts
-[automate_download_freesound.py](https://github.com/k-chuang/automate-download-freesound/blob/master/automate_download_freesound.py) - the main CLI program that uses Selenium to automate downloading sound files from freesound
+[automate_download_freesound.py](https://github.com/k-chuang/automate-download-freesound/blob/master/automate_download_freesound.py) - the main CLI program that uses Selenium to automate downloading sound files from freesound.
+
 [test_automate_download_freesound.py](https://github.com/k-chuang/automate-download-freesound/blob/master/test_automate_download_freesound.py) - the tester program that runs through unit tests and test cases for the main CLI application. 
 

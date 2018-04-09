@@ -25,7 +25,7 @@ before_script:
   - sleep 3
 
 script:
-  - py.test -v
+  - py.test --cov-report html --verbose
 
 after_success:
   - coveralls

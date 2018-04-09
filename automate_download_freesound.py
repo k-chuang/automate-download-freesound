@@ -28,6 +28,31 @@ def authenticate():
     return user_info
 
 
+def verify_authentication(user_info):
+    '''A function to check if login credentials are valid (True) or not valid (False)
+    :param user_info: a namedtuple with login credentials: user.email, user.password
+    :return: boolean value depending on if login credentials are valid
+    '''
+    driver = webdriver.Chrome()
+    driver.get("https://freesound.org/home/login/?next=/search/")
+    username = driver.find_element_by_xpath('//*[@id="id_username"]')
+    username.clear()
+    username.send_keys(user_info.email)
+    password = driver.find_element_by_xpath('//*[@id="id_password"]')
+    password.clear()
+    password.send_keys(user_info.password)
+    loginSelect = driver.find_element_by_xpath('//*[@id="content_full"]/form/input[2]')
+    loginSelect.send_keys(Keys.RETURN)
+
+    if re.match("https://freesound.org/home/login/", driver.current_url):
+        driver.quit()
+        return False
+    else:
+        print("Login successful!")
+        driver.quit()
+        return True
+
+
 def simulate_download(sound, download_path, user, pass_w, args):
     '''A function used to automate downloading of sound files via Selenium.
 
@@ -47,13 +72,12 @@ def simulate_download(sound, download_path, user, pass_w, args):
         # make a directory for the files to go to
         os.makedirs(full_path)
 
-    # Seting download path within Chrome options
+    # Setting download path within Chrome options
     chromeOptions = webdriver.ChromeOptions()
     prefs = {"download.default_directory": full_path}
     chromeOptions.add_experimental_option("prefs", prefs)
-    search_subject = sound
     driver = webdriver.Chrome(chrome_options=chromeOptions)
-
+    search_subject = sound
     try:
 
         driver.get("https://freesound.org/home/login/?next=/search/")
@@ -63,12 +87,6 @@ def simulate_download(sound, download_path, user, pass_w, args):
         password.send_keys(pass_w)
         loginSelect = driver.find_element_by_xpath('//*[@id="content_full"]/form/input[2]')
         loginSelect.send_keys(Keys.RETURN)
-
-        # Checking if login credentials are correct before moving out, if not exit the script
-        if re.match("https://freesound.org/home/login/", driver.current_url):
-            print("The login credentials you provided were incorrect. Please re-run the script. Exiting now...")
-            driver.quit()
-            exit(1)
 
         # Go to the freesound site, and enter in the desired sound
         driver.get("https://freesound.org")
@@ -236,6 +254,11 @@ def main(argv):
         download_path = os.path.expanduser("~") + "/Downloads/"
 
     user_info = authenticate()
+    credentials_flag = verify_authentication(user_info)
+
+    if not credentials_flag:
+        print("The credentials you entered were not correct. Please re-run the script. Exiting program...")
+        exit(1)
 
     for elem in sounds:
         simulate_download(elem, download_path, user_info.email, user_info.password, args)

@@ -4,6 +4,7 @@ Run with:
 $ pytest test_automate_download_freesound.py -v
 """
 import unittest
+import mock
 import automate_download_freesound
 from selenium import webdriver
 from selenium.webdriver.common.by import By
@@ -11,9 +12,13 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.keys import Keys
 from selenium.common.exceptions import NoSuchElementException, TimeoutException, WebDriverException
+import re
+import sys
+from collections import namedtuple
+import pytest
 
 
-class FreeSoundOrgLoginTest(unittest.TestCase):
+class FreeSoundOrgLoginElementsTest(unittest.TestCase):
     '''using the setUpClass() and tearDownClass() methods along with the @classmethod decorator.
     These methods enable us to set the values at the class level rather than at method level.
     The values initialized at class level are shared between the test methods.'''
@@ -33,11 +38,11 @@ class FreeSoundOrgLoginTest(unittest.TestCase):
         cls.driver.quit()
 
     def is_element_present(self, how, what):
-        """
+        '''
         Helper method to confirm the presence of an element on page
         :params how: By locator type
         :params what: locator value
-        """
+        '''
         try:
             self.driver.find_element(by=how, value=what)
         except NoSuchElementException:
@@ -74,11 +79,11 @@ class FreeSoundSearchByTextTest(unittest.TestCase):
         cls.driver.quit()
 
     def is_element_present(self, how, what):
-        """
+        '''
         Helper method to confirm the presence of an element on page
         :params how: By locator type
         :params what: locator value
-        """
+        '''
         try:
             self.driver.find_element(by=how, value=what)
         except NoSuchElementException:
@@ -137,11 +142,11 @@ class FreeSoundSearchTest(unittest.TestCase):
         cls.driver.quit()
 
     def is_element_present(self, how, what):
-        """
-        Helper method to confirm the presence of an element on page
-        :params how: By locator type
-        :params what: locator value
-        """
+        '''
+       Helper method to confirm the presence of an element on page
+       :params how: By locator type
+       :params what: locator value
+       '''
         try:
             self.driver.find_element(by=how, value=what)
         except NoSuchElementException:
@@ -186,20 +191,43 @@ class FreeSoundOrgAdvancedFilter(unittest.TestCase):
         cls.driver.quit()
 
     def is_element_present(self, how, what):
-        """
+        '''
         Helper method to confirm the presence of an element on page
-        :params how: By locator type
-        :params what: locator value
-        """
+       :params how: By locator type
+       :params what: locator value
+       '''
         try:
             self.driver.find_element(by=how, value=what)
         except NoSuchElementException:
             return False
         return True
 
-class SimulateDownloadIntegrationTest(unittest.TestCase):
 
+class SimulateDownloadIntegrationTest(unittest.TestCase):
     pass
+
+
+class FreeSoundLoginAuthenticationTest(unittest.TestCase):
+    '''
+    Test login authentication for freesound.org
+    '''
+    @mock.patch('getpass.getpass')
+    @mock.patch('__builtin__.raw_input')
+    def test_authenticate(self, input, getpass):
+        input.return_value = 'example@gmail.com'
+        getpass.return_value = 'MyPassword'
+        Credentials = namedtuple('Credentials', ['email', 'password'])
+        user_info = Credentials(email=input.return_value, password=getpass.return_value)
+        self.assertEqual(automate_download_freesound.authenticate(), user_info)
+
+    @mock.patch('getpass.getpass')
+    @mock.patch('__builtin__.raw_input')
+    def test_verify_authentication_fail(self, input, getpass):
+        input.return_value = 'example@gmail.com'
+        getpass.return_value = 'MyPassword'
+        Credentials = namedtuple('Credentials', ['email', 'password'])
+        user_info = Credentials(email=input.return_value, password=getpass.return_value)
+        self.assertFalse(automate_download_freesound.verify_authentication(user_info))
 
 
 class CommandLineArgumentsTests(unittest.TestCase):

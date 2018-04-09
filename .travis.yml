@@ -13,7 +13,8 @@ addons:
 
 before_install:
   - wget https://chromedriver.storage.googleapis.com/2.37/chromedriver_linux64.zip
-  - unzip chromedriver_linux64.zip -d /home/travis/virtualenv/python2.7.14
+  - unzip chromedriver_linux64.zip -d /home/travis/virtualenv/python2.7.14/
+  - export PATH=$PATH:/home/travis/virtualenv/python2.7.14/
 
 install:
   - pip install -r dev-requirements.txt

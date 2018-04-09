@@ -5,10 +5,10 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.keys import Keys
+from selenium.common.exceptions import NoSuchElementException, TimeoutException, WebDriverException
 import getpass
 import re
 import glob
-from selenium.common.exceptions import NoSuchElementException, TimeoutException
 import os
 import time
 from collections import namedtuple
@@ -197,12 +197,14 @@ def parse_args(argv):
                         dest='file_format',
                         type=str,
                         default="wav",
+                        choices=["wav", "flac", "aiff", "ogg", "mp3", "m4a"],
                         help='Enter the desired audio file format. Default will be wav files. '
                              'The available options are wav, aiff, flac, and mp3.')
 
     parser.add_argument('--sample-rate',
                         dest='samplerate',
                         type=int,
+                        choices=[11025, 16000, 22050, 44100, 48000, 88200, 96000],
                         default=48000,
                         help='Enter the desired sample rate of the file. Default will be 48000. '
                              'The available options are 11025, 22050, 44100, 48000, 88200, and 96000.')
@@ -215,7 +217,7 @@ def parse_args(argv):
                              'Only audio files with tags or filenames containing your search item will be downloaded.')
 
     # If no arguments provided, return help message
-    if len(sys.argv) == 1:
+    if len(argv) == 1:
         parser.print_help(sys.stderr)
         sys.exit(1)
 

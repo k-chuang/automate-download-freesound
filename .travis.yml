@@ -6,7 +6,12 @@ notifications:
   email: never
 
 python:
-  - "2.7"
+  - '2.7'
+
+env:
+  global:
+    - secure: bu5U/Dpv3U9u6MeEPGUQ5hZCju5IiigO0yd++LtTu7ZNp8UITjgTciBOXQrTMWfvdrbhJ2r4TPXU7MUoOOzJM653QUNIA2BGe6Z3CUk6uZ1VpErtbaeR1U9SY+XO4HgtQ5OmrtaJrCBFrI30i4ag8kBadqiH73bMQq+tNL/jvw261Guf9mNBytYURJYG5OP7gkqV+RdCefR/noQGJyQsWythljUpYYB12Mq4UhzjVWAf+r4J9/CLfdBXBXx2UZn69ToqtyCLQOmlTnP6XdMlO1l/Xn62I3JXu23E43MQhpxtqjj8+IBOlZA/BSp4mrEktgmYthjyJ6zyZPa95gc674leJFid0/torvASchhZiFpPy3lfkFLdZBM+ciSukOulgAeBD3Ph/BdMepWCJelAT2p/gX1LVwkO3BIvZasJdztJLwKrH8qyjMhwVZtwlgreul0yNNQy03Fg/a8ntiqvib//DTYrjBtGM3jlDVTyF+SQZhVxHUy2P0gQJ0ALJstAKnf12mJDerAW4nPJ2OIuemgpOG50SPHCWIrV9IHuzP/r1LH+cKwh3WaONNiAi3GSmw6Bylfhydz6O28g+Lolm3bXytTFVekB9p37x6kCOd7kCDgq0JFWKeTyFoxzDzXhj1rJV0IaN4S+fA7FQA0e2RNzGk7TGiWw4ooBSVdkycE=
+    - secure: NxfnnV8ovZC+s9LzJSJq2jURz+LqchOc+kV2fXTrIxFBVelDQdhrE1z9VgufveLuv84Jz5viSgY45kKcCivQ2Zt6KlweQnMXuoCNbaDmAAuXwhwEmnvbUX0yk6LiPIY6YX+faN8oYp+AnVY4JJ9XUdIbQgpdMSX4GhNxsEWXwyF4wMl2mTXl1+gmOY9lZW5tsRJK6CRYwgb2Z7kGrhrQUm4/f2lOAPfjN++02792j+BoiIAr2YyV62fAUVJMCOIGOLTGAD2uqJSNin/ChVOTankecJNFow7U7ujCvQcd+DvCzIxWv57/r0qrEQ6P6sCBANygqlj4vh8Nc2HcMfErFzFHgi/OFc5a7aJ2HiO6oXsnKDHZqbbxWYmKJTu7XSSKOpTA+e4yAFYvRT8pbUi9m1HKQ5WZDIwtpLzlhNj26wyKe9ZIqjpvzpD5dwD3VUNQTIUqvfL7fg2hzSEFgZCqhaj8wljuvUNddDaaVJNUU/I530TNYnOkNbS8+UtI/etH4IxUXQz8INiwZ9xicnxTNmQrNhk/tGUsPQ9/LD/TXxPFfmRuvHqR8imcbcoy3VdtmtHTf5IYbvhdlrTLZZJECIOKAciNXJgYxl9AUq62bZmTGHPGrw/+jwS/PD0rU4wPKHA6TlwA+oi4EvbErmFuujgFr1mI0nZ04/ds3UeTjRU=
 
 addons:
   chrome: stable
@@ -20,12 +25,12 @@ install:
   - pip install -r dev-requirements.txt
 
 before_script:
-  - "export DISPLAY=:99.0"
-  - "sh -e /etc/init.d/xvfb start"
+  - export DISPLAY=:99.0
+  - sh -e /etc/init.d/xvfb start
   - sleep 3
 
 script:
-  - pytest
+  - py.test
 
 after_success:
   - coveralls

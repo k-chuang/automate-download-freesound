@@ -16,6 +16,7 @@ import re
 import sys
 from collections import namedtuple
 import pytest
+import os
 
 
 class FreeSoundOrgLoginElementsTest(unittest.TestCase):
@@ -228,6 +229,15 @@ class FreeSoundLoginAuthenticationTest(unittest.TestCase):
         Credentials = namedtuple('Credentials', ['email', 'password'])
         user_info = Credentials(email=input.return_value, password=getpass.return_value)
         self.assertFalse(automate_download_freesound.verify_authentication(user_info))
+
+    @mock.patch('getpass.getpass')
+    @mock.patch('__builtin__.raw_input')
+    def test_verify_authentication_pass(self, input, getpass):
+        input.return_value = os.getenv['FREESOUND_EMAIL']
+        getpass.return_value = os.getenv['FREESOUND_PASSWORD']
+        Credentials = namedtuple('Credentials', ['email', 'password'])
+        user_info = Credentials(email=input.return_value, password=getpass.return_value)
+        self.assertTrue(automate_download_freesound.verify_authentication(user_info))
 
 
 class CommandLineArgumentsTests(unittest.TestCase):

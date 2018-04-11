@@ -1,6 +1,6 @@
 # Automating the Menial Tasks using Python Pt.2
 [![Build Status](https://travis-ci.org/k-chuang/automate-download-freesound.svg?branch=master)](https://travis-ci.org/k-chuang/automate-download-freesound)
-[![Coverage Status](https://coveralls.io/repos/github/k-chuang/automate-download-freesound/badge.svg?branch=master)](https://coveralls.io/github/k-chuang/automate-download-freesound?branch=master)
+
 
 A cool Python automation project that automates the menial task of downloading hundreds of audio files on 
 [Freesound](freesound.org) using Selenium, a web-browser automation tool.
@@ -13,7 +13,7 @@ Inspired by [Automating the Boring Stuff](https://automatetheboringstuff.com/) b
 
 
 # Setup
-Make sure to install the chromedriver.exe via brew or from the [Google site](https://sites.google.com/a/chromium.org/chromedriver/downloads),
+Install chromedriver via brew or from the [Google site](https://sites.google.com/a/chromium.org/chromedriver/downloads),
 and set the location of the chromedriver on your SYSTEM PATH.
 
 I installed the chromedriver via [brew](https://brew.sh/)(command is below), and naturally, brew installs packages to /usr/local/bin, which is already in your $PATH, so that is pretty convenient. You can always do an echo $PATH to make sure that /usr/local/bin is in it, and if it's not in your $PATH variable, then export it by editing either ~/.bash_profile or /etc/paths/.
@@ -39,7 +39,13 @@ There is only one required argument, and that is the desired sounds you wish to 
 
     $ python automate_download_freesound.py "dogs barking,cats purring"
 
-There are more features and arguments, including download path, file format, sample rate, and advanced filtering. These are all optional arguments, and are only there to help you with filtering for your needs.
+There are more features and arguments, including download path, file format, sample rate, and advanced filtering. These are all optional arguments, and can help with filtering for your specific needs.
+
+Here is another example, where all the optional arguments are specified:
+
+    $ python automate_download_freesound.py "baby crying,smoke alarm" --download-dir /Users/KevinChuang/Desktop --file-format       wav --sample-rate 48000 --advanced-filter True
+
+This command will download 'baby crying' and 'smoke alarm' wav files with a sampling rate of 48000 from Freesound.org.
 
 
 # Scripts

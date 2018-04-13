@@ -235,7 +235,7 @@ def simulate_download(sound, download_path, user, pass_w, args):
 
     except TimeoutException:
         print("Time out exception... Page took too long to load...")
-        exit(1)
+        sys.exit(1)
 
     return download_count
 
@@ -274,7 +274,7 @@ def parse_args(argv):
 
     parser.add_argument('--download-dir',
                         dest='downloadpath',
-                        default=None,
+                        default=os.path.expanduser("~") + "/Downloads/",
                         help='Optional argument to specify the download path where files will go. '
                              'Default will be your standard Downloads folder. '
                              'Works for both MacOS and Windows environments.')
@@ -286,7 +286,7 @@ def parse_args(argv):
                         choices=[None, "wav", "flac", "aiff", "ogg", "mp3", "m4a"],
                         help='Enter the desired audio file format. '
                              'Default will be all available audio file formats with no filtering. '
-                             'The available options are wav, aiff, flac, and mp3.')
+                             'The available options are wav, aiff, flac, ogg, m4a, and mp3.')
 
     parser.add_argument('--sample-rate',
                         dest='samplerate',
@@ -320,7 +320,7 @@ def main(argv):
     sounds = args.sounds
     download_path = args.downloadpath
 
-    if not download_path or not os.path.exists(download_path):
+    if not os.path.exists(download_path):
         print("The download destination directory specified does not exist... Defaulting to Downloads folder.")
         download_path = os.path.expanduser("~") + "/Downloads/"
 
@@ -329,7 +329,7 @@ def main(argv):
 
     if not credentials_flag:
         print("The credentials you entered were not correct. Please re-run the script. Exiting program...")
-        exit(1)
+        sys.exit(1)
 
     for elem in sounds:
         download_count = simulate_download(elem, download_path, user_info.email, user_info.password, args)

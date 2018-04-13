@@ -18,8 +18,8 @@ import os
 import shutil
 
 
-class FreeSoundOrgLoginElementsTest(unittest.TestCase):
-    '''using the setUpClass() and tearDownClass() methods along with the @classmethod decorator.
+class FreeSoundLoginElementsTest(unittest.TestCase):
+    '''Using the setUpClass() and tearDownClass() methods along with the @classmethod decorator.
     These methods enable us to set the values at the class level rather than at method level.
     The values initialized at class level are shared between the test methods.'''
     @classmethod
@@ -51,7 +51,7 @@ class FreeSoundOrgLoginElementsTest(unittest.TestCase):
 
 
 class FreeSoundSearchByTextTest(unittest.TestCase):
-    '''using the setUpClass() and tearDownClass() methods along with the @classmethod decorator.
+    '''Using the setUpClass() and tearDownClass() methods along with the @classmethod decorator.
     These methods enable us to set the values at the class level rather than at method level.
     The values initialized at class level are shared between the test methods.'''
     @classmethod
@@ -92,7 +92,7 @@ class FreeSoundSearchByTextTest(unittest.TestCase):
 
 
 class FreeSoundSearchTest(unittest.TestCase):
-    '''using the setUpClass() and tearDownClass() methods along with the @classmethod decorator.
+    '''Using the setUpClass() and tearDownClass() methods along with the @classmethod decorator.
     These methods enable us to set the values at the class level rather than at method level.
     The values initialized at class level are shared between the test methods.'''
     @classmethod
@@ -154,8 +154,8 @@ class FreeSoundSearchTest(unittest.TestCase):
         return True
 
 
-class FreeSoundOrgAdvancedFilter(unittest.TestCase):
-    '''using the setUpClass() and tearDownClass() methods along with the @classmethod decorator.
+class FreeSoundAdvancedFilter(unittest.TestCase):
+    '''Using the setUpClass() and tearDownClass() methods along with the @classmethod decorator.
     These methods enable us to set the values at the class level rather than at method level.
     The values initialized at class level are shared between the test methods.'''
     @classmethod
@@ -201,7 +201,6 @@ class FreeSoundOrgAdvancedFilter(unittest.TestCase):
         except NoSuchElementException:
             return False
         return True
-
 
 
 class SimulateDownloadIntegrationTest(unittest.TestCase):
@@ -261,11 +260,8 @@ class SimulateDownloadIntegrationTest(unittest.TestCase):
         shutil.rmtree(os.path.join(cls.download_path, 'glass breaking'), ignore_errors=True)
 
 
-
 class FreeSoundLoginAuthenticationTest(unittest.TestCase):
-    '''
-    Test login authentication for freesound.org
-    '''
+
     @mock.patch('getpass.getpass')
     @mock.patch('__builtin__.raw_input')
     def test_authenticate(self, input, getpass):
@@ -278,6 +274,9 @@ class FreeSoundLoginAuthenticationTest(unittest.TestCase):
     @mock.patch('getpass.getpass')
     @mock.patch('__builtin__.raw_input')
     def test_verify_authentication_fail(self, input, getpass):
+        '''
+        Test verify authentication to make sure fail
+        '''
         input.return_value = 'example@gmail.com'
         getpass.return_value = 'MyPassword'
         Credentials = namedtuple('Credentials', ['email', 'password'])
@@ -287,6 +286,9 @@ class FreeSoundLoginAuthenticationTest(unittest.TestCase):
     @mock.patch('getpass.getpass')
     @mock.patch('__builtin__.raw_input')
     def test_verify_authentication_pass(self, input, getpass):
+        '''
+         Test verify authentication to make sure pass
+        '''
         input.return_value = os.environ['FREESOUND_EMAIL']
         getpass.return_value = os.environ['FREESOUND_PASSWORD']
         Credentials = namedtuple('Credentials', ['email', 'password'])
@@ -302,7 +304,7 @@ class CommandLineArgumentsTests(unittest.TestCase):
         '''
         args = automate_download_freesound.parse_args(['automate_download_freesound.py', 'dogs'])
         self.assertEqual(args.sounds, ['dogs'])
-        self.assertEqual(args.downloadpath, None)
+        self.assertEqual(args.downloadpath, os.path.expanduser("~") + "/Downloads/")
         self.assertEqual(args.file_format, None)
         self.assertEqual(args.samplerate, None)
         self.assertFalse(args.advanced_filter)
@@ -314,7 +316,7 @@ class CommandLineArgumentsTests(unittest.TestCase):
         args = automate_download_freesound.parse_args(
             ['automate_download_freesound.py', "dogs barking loud, birds chirping loud"])
         self.assertEqual(args.sounds, ['dogs barking loud', 'birds chirping loud'])
-        self.assertEqual(args.downloadpath, None)
+        self.assertEqual(args.downloadpath, os.path.expanduser("~") + "/Downloads/")
         self.assertEqual(args.file_format, None)
         self.assertEqual(args.samplerate, None)
         self.assertFalse(args.advanced_filter)
@@ -326,34 +328,46 @@ class CommandLineArgumentsTests(unittest.TestCase):
         args = automate_download_freesound.parse_args(
             ['automate_download_freesound.py', "dogs,cats,birds,"])
         self.assertEqual(args.sounds, ['dogs', 'cats', 'birds'])
-        self.assertEqual(args.downloadpath, None)
+        self.assertEqual(args.downloadpath, os.path.expanduser("~") + "/Downloads/")
         self.assertEqual(args.file_format, None)
         self.assertEqual(args.samplerate, None)
         self.assertFalse(args.advanced_filter)
 
-    def test_parse_args_format_one(self):
+    def test_parse_args_format_pass(self):
         args = automate_download_freesound.parse_args(
             ['automate_download_freesound.py', "dogs,cats,birds,", "--file-format", "wav"])
         assert args.file_format in [None, "wav", "flac", "aiff", "ogg", "mp3", "m4a"]
 
-    def test_parse_args_format_two(self):
-        with self.assertRaises(SystemExit):
+    def test_parse_args_format_fail(self):
+        '''Test to see if there is a command line syntax error of wth error code 2
+        '''
+        with self.assertRaises(SystemExit) as err:
             automate_download_freesound.parse_args(
                 ['automate_download_freesound.py', "dogs,cats,birds,", "--file-format", "mp5"])
+        self.assertEqual(err.exception.code, 2)
 
-    def test_parse_args_samplerate_one(self):
+    def test_parse_args_samplerate_pass(self):
         args = automate_download_freesound.parse_args(
             ['automate_download_freesound.py', "dogs,cats,birds,", "--sample-rate", "48000"])
         assert int(args.samplerate) in [None, 11025, 16000, 22050, 44100, 48000, 88200, 96000]
 
-    def test_parse_args_samplerate_two(self):
-        with self.assertRaises(SystemExit):
+    def test_parse_args_samplerate_fail(self):
+        '''Test to see if there is a command line syntax error of wth error code 2
+        '''
+        with self.assertRaises(SystemExit) as err:
             automate_download_freesound.parse_args(
                 ['automate_download_freesound.py', "dogs,cats,birds,", "--sample-rate", "2500"])
+        self.assertEqual(err.exception.code, 2)
+
+    def test_parse_args_download_path_pass(self):
+        args = automate_download_freesound.parse_args(
+            ['automate_download_freesound.py', "dogs,cats,birds,"])
+        self.assertEqual(args.downloadpath, os.path.expanduser("~") + "/Downloads/")
 
     def test_main(self):
         '''
-        Test for main function to exit if no arguments provided
+        Test for main function to exit with error code 1 and provide help if no arguments provided
         '''
-        with self.assertRaises(SystemExit):
+        with self.assertRaises(SystemExit) as err:
             automate_download_freesound.main(['automate_download_freesound.py'])
+        self.assertEqual(err.exception.code, 1)

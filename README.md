@@ -54,3 +54,7 @@ This command will download 'baby crying' and 'smoke alarm' wav files with a samp
 
 [test_automate_download_freesound.py](https://github.com/k-chuang/automate-download-freesound/blob/master/test_automate_download_freesound.py) - the tester program that runs through unit tests and test cases for the main CLI application. 
 
+## License
+
+See the [LICENSE](https://github.com/k-chuang/automate-download-freesound/blob/master/LICENSE) file for license rights and limitations (MIT).
+
